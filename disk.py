@@ -443,7 +443,8 @@ def read_file( fn ):
 
 
 try:
-    import pyhardwareconf.py
+    import pyhardwareconf
+    megacli = pyhardwareconf.megacli
 except Exception, e:
     pass
 
