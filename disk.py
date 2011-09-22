@@ -52,6 +52,7 @@ PRODUCTS = {
         },
         'IBM': {
                 'IC35L146UCDY10-0' : { 'capacity' : "146G", 'interface': 'SCSI', 'bandwidth':'-', 'spinSpeed':10000, 'mediaType': 'SAS' },
+                '42D0788' : { 'capacity' : "2G", 'interface': 'SCSI', 'bandwidth':'-', 'spinSpeed':7200, 'mediaType': 'ATA' },
         },
         'HUAWEI': {
                 'S2600' : { 'capacity' : "-", 'interface': '-', 'bandwidth':'-', 'spinSpeed':0, 'mediaType': 'ARR' },
@@ -250,16 +251,20 @@ def get_raid_info():
         elif k == 'Inquiry Data':
             info = [ x.strip() for x in v.split( ' ' ) if x != '' ]
 
-            # IBM-ESXSCBRCA146C3ETS0 write vender and model together
+            # IBM-ESXSCBRCA146C3ETS0 write vendor and model together
 
             if len( info ) == 2 and info[ 0 ].startswith( 'IBM' ):
                 pd[ 'vendor' ], pd[ 'model' ], pd[ 'serial' ] = info[ 0 ].split( '-', 1 ) + info[ 1: ]
 
             elif len( info ) == 4:
                 if info[ 0 ] == 'ATA':
-                    # Like this:
                     # Inquiry Data: ATA     ST32000644NS    BB28            9WM575H9
-                    pd[ 'vendor' ], pd[ 'model' ], pd[ 'serial' ] = [ 'SEAGATE',  ] + [ info[ 1 ], info[ 3 ] ]
+                    pd[ 'vendor' ], pd[ 'model' ], pd[ 'serial' ] = [ 'SEAGATE', info[ 1 ], info[ 3 ] ]
+
+                elif info[ 2 ] == '42D0791IBM':
+                    # Inquiry Data:             9WM5750AST32000644NS         42D0788 42D0791IBM BB28
+                    pd[ 'vendor' ], pd[ 'model' ], pd[ 'serial' ] = [ 'IBM', info[ 1 ], info[ 0 ] ]
+
                 else:
                     raise UnspportedInquiry( v )
             else:
