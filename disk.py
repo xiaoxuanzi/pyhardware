@@ -164,12 +164,14 @@ def get_raid_info():
     # State: Optimal
     # Stripe Size: 64kB
     # Current Cache Policy: WriteBack ReadAdaptive Direct
+    # Slot Number: 10
     # Device Id: 0
     # Media Error Count: 0
     # Raw Size: 953869MB [0x74706db0 Sectors]
     # Non Coerced Size: 953357MB [0x74606db0 Sectors]
     # Coerced Size: 953344MB [0x74600000 Sectors]
     # Inquiry Data: SEAGATE ST31000424SS    KS659WK0Z3RZ
+    # Slot Number: 11
     # Device Id: 1
     # Raw Size: 953869MB [0x74706db0 Sectors]
     # Non Coerced Size: 953357MB [0x74606db0 Sectors]
@@ -177,7 +179,7 @@ def get_raid_info():
     # Inquiry Data: SEAGATE ST31000424SS    KS659WK0Z34P
     # Device Id: 2
 
-    cmd = megacli + ' -LdPdInfo  -aAll | grep "Device Id: \|Inquiry Data: \|Virtual Disk: \|Virtual Drive: \|RAID Level *: \|Media Error Count:\|Size:\|State: \|Current Cache Policy: "'
+    cmd = megacli + ' -LdPdInfo  -aAll | grep "Device Id: \|Inquiry Data: \|Virtual Disk: \|Virtual Drive: \|RAID Level *: \|Media Error Count:\|Size:\|State: \|Current Cache Policy: \|Slot Number: \|PD: "'
 
     megalines = shellcmd( cmd ).strip().split( "\n" )
     megalines = [ x for x in megalines if x != '' ]
@@ -228,9 +230,15 @@ def get_raid_info():
         elif k == 'Current Cache Policy':
             vd[ 'policy' ] = v
 
-        elif k == 'Device Id':
-            pd = { 'id' : int( v ) }
+        elif k == 'PD':
+            pd = {}
             pds[ v ] = pd
+
+        elif k == 'Slot Number':
+            pd[ 'slotNumber' ] = int( v )
+
+        elif k == 'Device Id':
+            pd[ 'id' ] = int( v )
             vd[ 'physicalDisks' ][ v ] = pd
 
         elif k == 'Media Error Count':
