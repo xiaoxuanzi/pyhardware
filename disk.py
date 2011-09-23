@@ -7,6 +7,8 @@ import types
 
 import digit
 import hardware
+import bus
+import lvm
 
 class DiskError( Exception ): pass
 class NoSuchDevice( DiskError ): pass
@@ -20,6 +22,7 @@ class MultiRAIDController( Unsupported ): pass
 class UnsupportedDevice( Unsupported ): pass
 class UnspportedInquiry( Unsupported ): pass
 class UnspportedVirtualDiskID( Unsupported ): pass
+class UnspportedLVM( Unsupported ): pass
 
 class DuplicatedVirtualDisk( Duplicated ): pass
 
@@ -311,19 +314,36 @@ def get_dev_physical_stack( dev, phyenv = {} ):
     # NOTE: linux only
 
     phyenv[ 'pciinfo' ] = phyenv.get( 'pciinfo', hardware.get_pci_info() )
-    rst = []
 
+
+    if dev.startswith( '/dev/mapper/vg' ):
+
+        # lvm
+        vgs = lvm.lvm_info()
+
+        for vg in vgs.values():
+
+            mappers = [ x.get( 'mapper' )
+                        for x in vg[ 'logicalVolumns' ].values() ]
+
+            if dev in mappers:
+                pvs = vg[ 'physicalVolumns' ]
+
+                rst = { 'mediaType': 'LVM' }
+                for pv in pvs.values():
+                    rst[ pv[ 'dev' ] ] = real_dev_phy_stack( pv[ 'dev' ], phyenv )
+
+                return [ rst ]
+
+        raise UnspportedLVM( dev, vgs )
+
+    else:
+        return real_dev_phy_stack( dev, phyenv )
+
+def real_dev_phy_stack( dev, phyenv ):
 
     node = _get_dev_physical_path( dev )
-    while node != '/':
-
-        phyinfo = collect_physical_device_info( node, phyenv[ 'pciinfo' ] )
-
-        if phyinfo.has_key( 'subsystem' ):
-            rst += [ phyinfo ]
-
-        node = os.path.split( node )[ 0 ]
-
+    rst = bus.device_bus_stack( node, phyenv )
 
     if len( rst ) > 0:
 
@@ -333,6 +353,7 @@ def get_dev_physical_stack( dev, phyenv = {} ):
 
 
     return rst
+
 
 def _collect_raid_info( phyStack, phyenv = {} ):
 
@@ -401,51 +422,6 @@ def determine_media_type( d ):
 
         return tp
 
-def collect_physical_device_info( node, pciinfo ):
-
-    phyinfo = {}
-
-    phyinfo[ 'id' ] = os.path.split( node )[ -1 ]
-
-    _link_tail( node, 'subsystem', phyinfo )
-    _link_tail( node, 'bus', phyinfo )
-    _link_tail( node, 'driver', phyinfo )
-
-    _file_cont( node, 'vendor', phyinfo )
-    _file_cont( node, 'model', phyinfo )
-    _file_cont( node, 'rev', phyinfo )
-
-
-    pref = '0000:'
-
-    if phyinfo.get( 'subsystem' ) == 'pci' \
-            and phyinfo[ 'id' ].startswith( pref ):
-
-        # A real pci device
-
-        pcikey = phyinfo[ 'id' ][ len( pref ): ]
-
-        if pciinfo.has_key( pcikey ):
-            phyinfo[ 'pciinfo' ] = pciinfo[ pcikey ]
-
-    return phyinfo
-
-
-def _file_cont( path, key, rst ):
-
-    contpath = os.path.join( path, key )
-
-    if os.path.isfile( contpath ):
-        rst[ key ] = read_file( contpath ).strip()
-        return rst[ key ]
-
-def _link_tail( path, key, rst ):
-
-    linkpath = os.path.join( path, key )
-
-    if os.path.islink( linkpath ):
-        rst[ key ] = os.readlink( linkpath ).split( os.path.sep )[ -1 ]
-        return rst[ key ]
 
 def shellcmd( cmd ):
     return os.popen( cmd ).read()
@@ -466,7 +442,7 @@ if __name__ == "__main__":
     args = sys.argv
 
     if len( args ) > 1:
-        if args[ 1:2 ] == [ 'test' ]:
-            pprint.pprint( get_dev_physical_stack( '/dev/sdb' ) )
+        if args[ 1:2 ] == [ 'phy' ]:
+            pprint.pprint( get_dev_physical_stack( args[ 2 ] ) )
         elif args[ 1:2 ] == [ 'raid' ]:
             pprint.pprint( get_raid_info() )
