@@ -5,7 +5,7 @@ import os
 
 from pyhardwareutil import *
 
-vgdisplay = 'vgdisplay'
+vgdisplay = '/usr/sbin/vgdisplay'
 
 try:
     import pyhardwareconf

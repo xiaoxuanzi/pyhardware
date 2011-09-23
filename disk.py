@@ -55,8 +55,12 @@ PRODUCTS = {
         },
         'IBM': {
                 'IC35L146UCDY10-0' : { 'capacity' : "146G", 'interface': 'SCSI', 'bandwidth':'-', 'spinSpeed':10000, 'mediaType': 'SAS' },
-                '42D0788' : { 'capacity' : "2G", 'interface': 'SCSI', 'bandwidth':'-', 'spinSpeed':7200, 'mediaType': 'ATA' },
+                '42D0788' : { 'capacity' : "2T", 'interface': 'SCSI', 'bandwidth':'-', 'spinSpeed':0, 'mediaType': 'SAS' },
         },
+        'IBM-ESXS': {
+                'CBRCA146C3ETS0 N' : { 'capacity' : "133G", 'interface': 'SCSI', 'bandwidth':'-', 'spinSpeed':7200, 'mediaType': 'ATA' },
+                
+        }, 
         'HUAWEI': {
                 'S2600' : { 'capacity' : "-", 'interface': '-', 'bandwidth':'-', 'spinSpeed':0, 'mediaType': 'ARR' },
         },
@@ -320,6 +324,8 @@ def get_dev_physical_stack( dev, phyenv = {} ):
 
         # lvm
         vgs = lvm.lvm_info()
+
+        logger.info( 'lvm is ' +repr( vgs ) )
 
         for vg in vgs.values():
 
