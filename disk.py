@@ -39,6 +39,9 @@ def set_logger( lg ):
 megacli = None # would be filled in by pyhardwareconf.py
 
 PRODUCTS = {
+        'WD': {
+                'WD2000FYYG' : { 'capacity' : "2T", 'interface': 'SAS', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
+        },
         'SEAGATE': {
                 'ST31000424SS' : { 'capacity' : "1T", 'interface': 'SAS', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
                 'ST9146803SS' : { 'capacity' : "146G", 'interface': 'SAS', 'bandwidth':'6Gbps', 'spinSpeed':10000, 'mediaType': 'SAS' },
