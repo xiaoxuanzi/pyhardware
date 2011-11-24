@@ -187,7 +187,22 @@ def get_raid_info():
     # Inquiry Data: SEAGATE ST31000424SS    KS659WK0Z34P
     # Device Id: 2
 
-    cmd = megacli + ' -LdPdInfo  -aAll | grep "Device Id: \|Inquiry Data: \|Virtual Disk: \|Virtual Drive: \|RAID Level *: \|Media Error Count:\|Size:\|State: \|Current Cache Policy: \|Slot Number: \|PD: "'
+    keys = [ "Device Id",
+             "Inquiry Data",
+             "Virtual Disk",
+             "Virtual Drive",
+             "RAID Level *",
+             "Firmware state",
+             "Media Error Count",
+             "Size",
+             "State",
+             "Current Cache Policy",
+             "Slot Number",
+             "PD", ]
+
+    keys = [ x + ": " for x in keys ]
+
+    cmd = megacli + ( ' -LdPdInfo  -aAll | grep "%s"' % ( "\|".join( keys ),  ) )
 
     megalines = shellcmd( cmd ).strip().split( "\n" )
     megalines = [ x for x in megalines if x != '' ]
@@ -248,6 +263,10 @@ def get_raid_info():
         elif k == 'Device Id':
             pd[ 'id' ] = int( v )
             vd[ 'physicalDisks' ][ v ] = pd
+
+        elif k == 'Firmware state':
+            pd[ 'firmwareState' ] = [ x.strip()
+                                      for x in v.split( ',' ) ]
 
         elif k == 'Media Error Count':
             pd[ 'mediaError' ] = int( v )
