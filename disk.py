@@ -56,9 +56,12 @@ PRODUCTS = {
         'TOYOU': {
                 'NetStor_iSUM520' : { 'capacity' : "-", 'interface': '-', 'bandwidth':'4Gbps', 'spinSpeed':0, 'mediaType': 'ARR' },
         },
+        'TOSHIBA': {
+                'MK2001TRKB' : { 'capacity' : "2T", 'interface': 'SATA', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
+        },
         'IBM': {
                 'IC35L146UCDY10-0' : { 'capacity' : "146G", 'interface': 'SCSI', 'bandwidth':'-', 'spinSpeed':10000, 'mediaType': 'SAS' },
-                '42D0788' : { 'capacity' : "2T", 'interface': 'SCSI', 'bandwidth':'-', 'spinSpeed':0, 'mediaType': 'SAS' },
+                '42D0788' : { 'capacity' : "2T", 'interface': 'SATA', 'bandwidth':'-', 'spinSpeed':7200, 'mediaType': 'ATA' },
         },
         'IBM-ESXS': {
                 'CBRCA146C3ETS0 N' : { 'capacity' : "133G", 'interface': 'SCSI', 'bandwidth':'-', 'spinSpeed':7200, 'mediaType': 'ATA' },
@@ -411,16 +414,22 @@ def _collect_raid_info( phyStack, phyenv = {} ):
 
 
     _id = topDev[ 'id' ].split( ':' )[ 2 ]
-    topDev[ 'raid' ] = { 'virtualDisk' : vds[ _id ], }
+    if vds.has_key( _id ):
+        topDev[ 'raid' ] = { 'virtualDisk' : vds[ _id ], }
+    else:
+        topDev[ 'raid' ] = { 'virtualDisk' : None, }
 
 def determine_media_type( d ):
 
     if d.has_key( 'raid' ):
 
-        raid = d[ 'raid' ]
-
-        vd = raid[ 'virtualDisk' ]
-        pds = vd[ 'physicalDisks' ]
+        try:
+            raid = d[ 'raid' ]
+            vd = raid[ 'virtualDisk' ]
+            pds = vd[ 'physicalDisks' ]
+        except Exception, e:
+            logger.warn( "disk on raid card but failed to read raid info: " + repr( d ) )
+            return 'UNKNOWN'
 
         if len( pds.keys() ) > 1:
             # traditional RAID 5/6

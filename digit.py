@@ -13,6 +13,8 @@ for d in digs:
     globals()[ d ] = val
     digName[ str( val ) ] = val
     digValue[ d ] = val
+    digValue[ d + 'B' ] = val
+    digValue[ d + 'IB' ] = val
 
 
 def parse_int( i ):
@@ -22,11 +24,18 @@ def parse_int( i ):
     if type( i ) in ( type( 0 ), type( 0L ) ):
         return i
     elif type( i ) in types.StringTypes:
-        unit = i[ -1 ].upper()
+
+        i = i.upper().rstrip( 'B' ).rstrip( 'I' )
+
+        unit = i[ -1 ]
+
         if unit in digValue.keys():
             return int( float( i[ :-1 ] ) * digValue[ unit ] )
 
     raise ValueError( 'Unrecognized int value:' + repr( i ) )
 
 if __name__ == "__main__":
+    print digValue
+    print parse_int( '3MB' )
     print parse_int( '3M' )
+    print parse_int( '3MiB' )
