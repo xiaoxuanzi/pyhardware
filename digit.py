@@ -28,9 +28,11 @@ def parse_int( i ):
         i = i.upper().rstrip( 'B' ).rstrip( 'I' )
 
         unit = i[ -1 ]
-
-        if unit in digValue.keys():
-            return int( float( i[ :-1 ] ) * digValue[ unit ] )
+        if unit in digs:
+            if unit in digValue.keys():
+                return int( float( i[ :-1 ] ) * digValue[ unit ] )
+        else:
+            return int( float( i ) )
 
     raise ValueError( 'Unrecognized int value:' + repr( i ) )
 
@@ -39,3 +41,4 @@ if __name__ == "__main__":
     print parse_int( '3MB' )
     print parse_int( '3M' )
     print parse_int( '3MiB' )
+    print parse_int( '3' )
