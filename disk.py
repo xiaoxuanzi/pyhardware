@@ -48,6 +48,7 @@ PRODUCTS = {
                 'ST9146802SS'  : { 'capacity' : "146G", 'interface': 'SAS', 'bandwidth':'3Gbps', 'spinSpeed':10000, 'mediaType': 'SAS' },
                 'ST3146807LC'  : { 'capacity' : "146G", 'interface': 'SCSI', 'bandwidth':'6Gbps', 'spinSpeed':10000, 'mediaType': 'SAS' },
                 'ST32000644NS' : { 'capacity' : "2T", 'interface': 'SATA', 'bandwidth':'3Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
+                'ST32000444SS' : { 'capacity' : "2T", 'interface': 'SATA', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
         },
         # NOTE: This actually is SEAGATE disk, but MegaCli report its vendor as 'ATA'
         'ATA': {
@@ -100,7 +101,12 @@ def get_device( path ):
 def get_dev_uuid( devpath ):
 
     devuuids = shellcmd( '/sbin/blkid %s | /bin/grep -o "UUID[^ ]*"' % ( devpath,  ) )
-    devuuids = devuuids.strip().split( '\n' )
+    devuuids = devuuids.strip()
+
+    if devuuids == '':
+        return None
+
+    devuuids = devuuids.split( '\n' )
     devuuids = [ x.strip().split( '"' )[ 1 ] for x in devuuids ]
     return devuuids[ 0 ]
 
