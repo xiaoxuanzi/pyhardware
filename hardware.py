@@ -4,7 +4,15 @@
 import os
 
 
-KEY_RAID_CONTROLLER = 'RAID bus controller'
+RAID_CARD = {
+        'Serial Attached SCSI controller': [
+                { 'brand': 'LSI Logic / Symbios Logic SAS2008 PCI-Express Fusion-MPT SAS-2 [Falcon] ', },
+        ],
+
+        'RAID bus controller': [
+                { 'brand': '', },
+        ],
+}
 
 
 class HardwareError( Exception ): pass
@@ -28,10 +36,30 @@ def get_pci_info():
     pciinfo = dict( pciinfo )
 
     if len( [ x for x in pciinfo.values()
-              if x[ 'type' ] == KEY_RAID_CONTROLLER ] ) > 1:
+              if is_raid_card( x ) ] ) > 1:
         raise MultiRAIDController( pciinfo )
 
     return pciinfo
+
+
+def is_raid_card( pci ):
+
+    if pci is None \
+            or 'type' not in pci \
+            or 'brand' not in pci:
+        return False
+
+
+    for condition in RAID_CARD.get( pci[ 'type' ], [] ):
+
+        if 'brand' in condition:
+
+            brand = condition[ 'brand' ]
+            if pci[ 'brand' ].startswith( brand ):
+                return True
+
+    return False
+
 
 def shellcmd( cmd ):
     return os.popen( cmd ).read()

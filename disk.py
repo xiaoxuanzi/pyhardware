@@ -49,6 +49,8 @@ PRODUCTS = {
                 'ST3146807LC'  : { 'capacity' : "146G", 'interface': 'SCSI', 'bandwidth':'6Gbps', 'spinSpeed':10000, 'mediaType': 'SAS' },
                 'ST32000644NS' : { 'capacity' : "2T", 'interface': 'SATA', 'bandwidth':'3Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
                 'ST32000444SS' : { 'capacity' : "2T", 'interface': 'SATA', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
+                'ST2000NM0001' : { 'capacity' : "2T", 'interface': 'SATA', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
+                'ST1000NM0001' : { 'capacity' : "1T", 'interface': 'SATA', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
         },
         # NOTE: This actually is SEAGATE disk, but MegaCli report its vendor as 'ATA'
         'ATA': {
@@ -394,17 +396,13 @@ def real_dev_phy_stack( dev, phyenv ):
 
 def _collect_raid_info( phyStack, phyenv = {} ):
 
-    isRaidCtr = lambda x: x.get( 'pciinfo', {} ).get( 'type' ) in [ hardware.KEY_RAID_CONTROLLER ]
-
-    raidctrs = [ x for x in phyStack if isRaidCtr( x ) ]
+    raidctrs = [ x for x in phyStack
+                 if hardware.is_raid_card( x.get( 'pciinfo' ) ) ]
 
     if raidctrs == [] \
             or phyStack[ 0 ] == raidctrs[ 0 ]:
         # cciss RAID controller has no children device as disk
         return
-
-    raidctr = raidctrs[ 0 ]
-
 
     topDev = phyStack[ 0 ]
 
@@ -428,42 +426,60 @@ def _collect_raid_info( phyStack, phyenv = {} ):
 def determine_media_type( d ):
 
     if d.has_key( 'raid' ):
+        return get_mediatype_raid( d )
+    else:
+        return get_mediatype_nonraid( d )
 
-        try:
-            raid = d[ 'raid' ]
-            vd = raid[ 'virtualDisk' ]
-            pds = vd[ 'physicalDisks' ]
-        except Exception, e:
-            logger.warn( "disk on raid card but failed to read raid info: " + repr( d ) )
+
+def get_mediatype_raid( d ):
+
+    try:
+        raid = d[ 'raid' ]
+        vd = raid[ 'virtualDisk' ]
+        pds = vd[ 'physicalDisks' ]
+    except Exception, e:
+
+        # disk on raid card but having problem extracting raid info
+        if d.get( 'model' ) in ( 'Logical Volume', ):
             return 'UNKNOWN'
 
-        if len( pds.keys() ) > 1:
-            # traditional RAID 5/6
-            tp = 'HDD'
-        else:
-            pd = pds.values()[ 0 ]
-            try:
-                tp = PRODUCTS[ pd[ 'vendor' ] ][ pd[ 'model' ] ][ 'mediaType' ]
-            except Exception, e:
-                logger.warn( 'Unknown physical device as RAID 0:' + repr( pd ) )
-                tp = 'UNKNOWN'
+        # Some physical disk connected through raidcard like "Serial Attached
+        # SCSI controller".  presents as standard scsi disk.
+        rst = get_mediatype_nonraid( d )
 
-        return tp
+        if rst == 'UNKNOWN':
+            logger.notified( "disk on raid card but failed to read raid info: " + repr( d ) )
 
+        return rst
+
+    if len( pds.keys() ) > 1:
+        # traditional RAID 5/6
+        tp = 'HDD'
     else:
-
-        # cciss RAID controller has no children device as disk
-        if d.get( 'subsystem' ) == 'scsi':
-
-            try:
-                tp = PRODUCTS[ d[ 'vendor' ] ][ d[ 'model' ] ][ 'mediaType' ]
-            except Exception, e:
-                logger.warn( 'Unknown physical device:' + repr( d ) )
-                tp = 'UNKNOWN'
-        else:
+        pd = pds.values()[ 0 ]
+        try:
+            tp = PRODUCTS[ pd[ 'vendor' ] ][ pd[ 'model' ] ][ 'mediaType' ]
+        except Exception, e:
+            logger.warn( 'Unknown physical device as RAID 0:' + repr( pd ) )
             tp = 'UNKNOWN'
 
-        return tp
+    return tp
+
+
+def get_mediatype_nonraid( d ):
+
+    # cciss RAID controller has no children device as disk
+    if d.get( 'subsystem' ) == 'scsi':
+
+        try:
+            tp = PRODUCTS[ d[ 'vendor' ] ][ d[ 'model' ] ][ 'mediaType' ]
+        except Exception, e:
+            logger.warn( 'Unknown physical device:' + repr( d ) )
+            tp = 'UNKNOWN'
+    else:
+        tp = 'UNKNOWN'
+
+    return tp
 
 
 def shellcmd( cmd ):
