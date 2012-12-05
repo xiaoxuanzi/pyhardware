@@ -77,8 +77,9 @@ PRODUCTS = {
         'LSILOGIC': {
                 'Logical Volume' : { 'capacity' : "-", 'interface': '-', 'bandwidth':'-', 'spinSpeed':0, 'mediaType': 'UNKNOWN' },
         },
-
-
+        'HITACHI': {
+                'HUS723020ALS640' : { 'capacity' : "2T", 'interface': 'SATA', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
+        },
 }
 
 def ensure_mountpoint( path ):
