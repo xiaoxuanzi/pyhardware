@@ -56,6 +56,7 @@ PRODUCTS = {
         # NOTE: This actually is SEAGATE disk, but MegaCli report its vendor as 'ATA'
         'ATA': {
                 'ST32000644NS' : { 'capacity' : "2T", 'interface': 'SATA', 'bandwidth':'3Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
+                'ST3500514NS': { 'capacity' : "500G", 'interface': 'SATA', 'bandwidth':'3Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
         },
         'TOYOU': {
                 'NetStor_iSUM520' : { 'capacity' : "-", 'interface': '-', 'bandwidth':'4Gbps', 'spinSpeed':0, 'mediaType': 'ARR' },
