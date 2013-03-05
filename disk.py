@@ -63,6 +63,7 @@ PRODUCTS = {
         },
         'TOSHIBA': {
                 'MK2001TRKB' : { 'capacity' : "2T", 'interface': 'SATA', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
+                'MK1001TRKB' : { 'capacity' : "1T", 'interface': 'SATA', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
         },
         'IBM': {
                 'IC35L146UCDY10-0' : { 'capacity' : "146G", 'interface': 'SCSI', 'bandwidth':'-', 'spinSpeed':10000, 'mediaType': 'SAS' },
