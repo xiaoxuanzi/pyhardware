@@ -50,6 +50,7 @@ PRODUCTS = {
                 'ST32000644NS' : { 'capacity' : "2T", 'interface': 'SATA', 'bandwidth':'3Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
                 'ST32000444SS' : { 'capacity' : "2T", 'interface': 'SATA', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
                 'ST2000NM0001' : { 'capacity' : "2T", 'interface': 'SATA', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
+                'ST2000NM0023' : { 'capacity' : "2T", 'interface': 'SATA', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
                 'ST1000NM0001' : { 'capacity' : "1T", 'interface': 'SATA', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
                 'ST32000645SS' : { 'capacity' : "2T", 'interface': 'SATA', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
         },
