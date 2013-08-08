@@ -41,6 +41,8 @@ megacli = None # would be filled in by pyhardwareconf.py
 PRODUCTS = {
         'WD': {
                 'WD2000FYYG' : { 'capacity' : "2T", 'interface': 'SAS', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
+                'WD2001FYYG' : { 'capacity' : "2T", 'interface': 'SAS', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
+                'WD1460BKFG' : { 'capacity' : "146G", 'interface': 'SAS', 'bandwidth':'6Gbps', 'spinSpeed':10000, 'mediaType': 'ATA' },
         },
         'SEAGATE': {
                 'ST31000424SS' : { 'capacity' : "1T", 'interface': 'SAS', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
@@ -54,11 +56,14 @@ PRODUCTS = {
                 'ST1000NM0001' : { 'capacity' : "1T", 'interface': 'SATA', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
                 'ST32000645SS' : { 'capacity' : "2T", 'interface': 'SATA', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
                 'ST33000650NS' : { 'capacity' : "3T", 'interface': 'SATA', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
+                'ST33000650SS' : { 'capacity' : "3T", 'interface': 'SAS', 'bandwidth':'4.7Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
         },
         # NOTE: This actually is SEAGATE disk, but MegaCli report its vendor as 'ATA'
         'ATA': {
                 'ST32000644NS' : { 'capacity' : "2T", 'interface': 'SATA', 'bandwidth':'3Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
                 'ST3500514NS': { 'capacity' : "500G", 'interface': 'SATA', 'bandwidth':'3Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
+                'ST33000650NS' : { 'capacity' : "3T", 'interface': 'SATA', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
+                'ST31000340NS' : { 'capacity' : "1T", 'interface': 'SATA', 'bandwidth':'3Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
         },
         'TOYOU': {
                 'NetStor_iSUM520' : { 'capacity' : "-", 'interface': '-', 'bandwidth':'4Gbps', 'spinSpeed':0, 'mediaType': 'ARR' },
@@ -70,6 +75,7 @@ PRODUCTS = {
         'IBM': {
                 'IC35L146UCDY10-0' : { 'capacity' : "146G", 'interface': 'SCSI', 'bandwidth':'-', 'spinSpeed':10000, 'mediaType': 'SAS' },
                 '42D0788' : { 'capacity' : "2T", 'interface': 'SATA', 'bandwidth':'-', 'spinSpeed':7200, 'mediaType': 'ATA' },
+                'ESXSMBE2147RC' : { 'capacity' : "146G", 'interface': 'SAS', 'bandwidth':'6Gbps', 'spinSpeed':15000, 'mediaType': 'ATA' },
         },
         'IBM-ESXS': {
                 'CBRCA146C3ETS0 N' : { 'capacity' : "133G", 'interface': 'SCSI', 'bandwidth':'-', 'spinSpeed':7200, 'mediaType': 'ATA' },
@@ -299,8 +305,17 @@ def get_raid_info():
 
             # IBM-ESXSCBRCA146C3ETS0 write vendor and model together
 
-            if len( info ) == 2 and info[ 0 ].startswith( 'IBM' ):
-                pd[ 'vendor' ], pd[ 'model' ], pd[ 'serial' ] = info[ 0 ].split( '-', 1 ) + info[ 1: ]
+            if len( info ) == 2:
+
+                if info[ 0 ].startswith( 'IBM' ):
+                    pd[ 'vendor' ], pd[ 'model' ], pd[ 'serial' ] = info[ 0 ].split( '-', 1 ) + info[ 1: ]
+
+                elif info[ 0 ] == 'WD':
+                    # Inquiry Data: WD      WD1460BKFG-18P2VD1E4WXM1E31XNR61
+                    pd[ 'vendor' ], pd[ 'model' ], pd[ 'serial' ] = info[ 0:1 ] + info[ 1 ].split( '-', 1 )
+
+                else:
+                    raise UnspportedInquiry( v )
 
             elif len( info ) == 4:
                 if info[ 0 ] == 'ATA':
