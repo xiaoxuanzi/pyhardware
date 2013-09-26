@@ -42,7 +42,6 @@ PRODUCTS = {
         'WD': {
                 'WD2000FYYG' : { 'capacity' : "2T", 'interface': 'SAS', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
                 'WD2001FYYG' : { 'capacity' : "2T", 'interface': 'SAS', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
-                'WD1460BKFG' : { 'capacity' : "146G", 'interface': 'SAS', 'bandwidth':'6Gbps', 'spinSpeed':10000, 'mediaType': 'ATA' },
         },
         'SEAGATE': {
                 'ST31000424SS' : { 'capacity' : "1T", 'interface': 'SAS', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
@@ -75,7 +74,6 @@ PRODUCTS = {
         'IBM': {
                 'IC35L146UCDY10-0' : { 'capacity' : "146G", 'interface': 'SCSI', 'bandwidth':'-', 'spinSpeed':10000, 'mediaType': 'SAS' },
                 '42D0788' : { 'capacity' : "2T", 'interface': 'SATA', 'bandwidth':'-', 'spinSpeed':7200, 'mediaType': 'ATA' },
-                'ESXSMBE2147RC' : { 'capacity' : "146G", 'interface': 'SAS', 'bandwidth':'6Gbps', 'spinSpeed':15000, 'mediaType': 'ATA' },
         },
         'IBM-ESXS': {
                 'CBRCA146C3ETS0 N' : { 'capacity' : "133G", 'interface': 'SCSI', 'bandwidth':'-', 'spinSpeed':7200, 'mediaType': 'ATA' },
@@ -305,17 +303,8 @@ def get_raid_info():
 
             # IBM-ESXSCBRCA146C3ETS0 write vendor and model together
 
-            if len( info ) == 2:
-
-                if info[ 0 ].startswith( 'IBM' ):
-                    pd[ 'vendor' ], pd[ 'model' ], pd[ 'serial' ] = info[ 0 ].split( '-', 1 ) + info[ 1: ]
-
-                elif info[ 0 ] == 'WD':
-                    # Inquiry Data: WD      WD1460BKFG-18P2VD1E4WXM1E31XNR61
-                    pd[ 'vendor' ], pd[ 'model' ], pd[ 'serial' ] = info[ 0:1 ] + info[ 1 ].split( '-', 1 )
-
-                else:
-                    raise UnspportedInquiry( v )
+            if len( info ) == 2 and info[ 0 ].startswith( 'IBM' ):
+                pd[ 'vendor' ], pd[ 'model' ], pd[ 'serial' ] = info[ 0 ].split( '-', 1 ) + info[ 1: ]
 
             elif len( info ) == 4:
                 if info[ 0 ] == 'ATA':
@@ -526,3 +515,8 @@ if __name__ == "__main__":
             pprint.pprint( get_dev_physical_stack( args[ 2 ] ) )
         elif args[ 1:2 ] == [ 'raid' ]:
             pprint.pprint( get_raid_info() )
+        elif args[ 1:2 ] == [ 'mountpoint' ]:
+            print get_mountpoint( (args + [ "." ])[ 2 ] )
+        elif args[ 1:2 ] == [ 'device' ]:
+            print get_device( (args + [ "." ])[ 2 ] )
+
