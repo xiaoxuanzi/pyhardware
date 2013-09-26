@@ -56,6 +56,7 @@ PRODUCTS = {
                 'ST32000645SS' : { 'capacity' : "2T", 'interface': 'SATA', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
                 'ST33000650NS' : { 'capacity' : "3T", 'interface': 'SATA', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
                 'ST33000650SS' : { 'capacity' : "3T", 'interface': 'SAS', 'bandwidth':'4.7Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
+                'ST1000NM0023' : { 'capacity' : "1T", 'interface': 'SAS', 'bandwidth':'6Gbps', 'spinSpeed':7200, 'mediaType': 'ATA' },
         },
         # NOTE: This actually is SEAGATE disk, but MegaCli report its vendor as 'ATA'
         'ATA': {
